@@ -13,8 +13,6 @@ GEODATA_DIR := data/geodata
 
 .SECONDARY:
 
-.DELETE_ON_ERROR:
-
 .PHONY: clean-geodata install eval
 
 install: osmfilter osmconvert

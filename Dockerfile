@@ -8,6 +8,7 @@ RUN apt-get -y -q update \
 	g++ \
 	gcc \
 	make \
+	texlive-xetex \
 	curl \
 	libz-dev \
 	python3 \
