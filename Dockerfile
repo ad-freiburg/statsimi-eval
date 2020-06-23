@@ -18,6 +18,7 @@ RUN apt-get -y -q update \
 ENV HOME /root
 ENV PATH="${PATH}:/usr/local/bin:$HOME/.local/bin"
 COPY Makefile $HOME
+COPY normalization.rules $HOME
 WORKDIR $HOME
 RUN make install
 ENTRYPOINT ["make"]
