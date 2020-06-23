@@ -8,11 +8,13 @@ Given statsimi is installed on your system and the ``statsimi`` command availabl
 
 ### Targets
 
- * ``make help`` Display help
- * ``make eval`` Run evaluation for each dataset
- * ``make freiburg_eval`` Run evaluation on the Freiburg dataset
- * ``make london_eval`` Run evaluation on the London dataset
- * ``make dach_eval`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
+Use these targets either as ``make <target>`` if statsimi is already installed, or as ``sudo docker run <container> <target>`` when using a Docker container (see below).
+
+ * ``help`` Display help
+ * ``eval`` Run evaluation for each dataset
+ * ``freiburg_eval`` Run evaluation on the Freiburg dataset
+ * ``london_eval`` Run evaluation on the London dataset
+ * ``dach_eval`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
 
 Evaluation results and the geodata will be written into a folder ``/data``.
 

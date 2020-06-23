@@ -1,6 +1,8 @@
 NORM_FILE := ""
 
 BASE_CMD := statsimi --norm_file=$(NORM_FILE)
+
+# in meters
 CUTOFFDIST := 1000
 
 # probability a station is spiced
@@ -13,14 +15,17 @@ GEODATA_DIR := data/geodata
 
 .SECONDARY:
 
-.PHONY: clean-geodata install eval
+.PHONY: clean install eval help
+
+help:
+	@cat README.md
 
 install: osmfilter osmconvert
 	@echo Installing statsimi
 	@git clone --recurse-submodules https://github.com/ad-freiburg/statsimi
 	@cd statsimi && pip3 install wheel && pip3 install .
 
-eval: freiburg_eval london_eval dach_eval 
+eval: freiburg_eval london_eval dach_eval
 
 osmfilter:
 	@echo Installing osmfilter
@@ -140,5 +145,3 @@ $(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m osm
 clean:
 	@rm -rf $(GEODATA_DIR)
 	@rm -rf $(EVAL_RES_DIR)
-	@find . -name "*.pyc" | xargs rm -f
-	@find . -name "__pycache__" | xargs rm -rf
