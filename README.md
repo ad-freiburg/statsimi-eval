@@ -1,6 +1,6 @@
 # statsimi evaluation
 
-Evaluation of statsimi, a tool for similarity classification of public transit stations.
+Evaluation setup for [statsimi](https://github.com/ad-freiburg/statsimi), a tool for similarity classification of public transit stations.
 
 ## Run without Docker
 
