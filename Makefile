@@ -1,6 +1,8 @@
 NORM_FILE := ""
 
-BASE_CMD := statsimi --norm_file=$(NORM_FILE)
+STATSIMI := statsimi
+
+BASE_CMD := $(STATSIMI) --norm_file=$(NORM_FILE)
 
 # in meters
 CUTOFFDIST := 1000
@@ -25,7 +27,7 @@ install: osmfilter osmconvert
 	@git clone --recurse-submodules https://github.com/ad-freiburg/statsimi
 	@cd statsimi && pip3 install wheel && pip3 install .
 
-eval: freiburg_eval london_eval dach_eval
+eval: freiburg.eval.tsv london.eval.tsv dach.eval.tsv
 
 osmfilter:
 	@echo Installing osmfilter
@@ -38,8 +40,11 @@ osmconvert:
 $(EVAL_RES_DIR)/%/:
 	mkdir -p $@
 
-%_eval: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf_topk/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
-	@echo Finished evaluation run for $*
+%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf_topk/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
+	@echo Finished evaluation run for $*.
+	@echo This table is saved to $@
+	@echo
+	@(echo " \tprec\trec\tF1\tmodelargs\tfbargs" && for f in $^; do awk '{s=$$0};END{print FILENAME "\t" s}' $$f;done) | sed "s|$(EVAL_RES_DIR)/$*/||g" | sed "s|/output.txt||g" | column -t -s "$$(printf '\t')" 2>&1 | tee $@
 
 $(EVAL_RES_DIR)/%/geodist/output.txt: $(GEODATA_DIR)/%-stations.osm | $(EVAL_RES_DIR)/%/geodist/
 	@echo == Evaluating geodist thresholds for $* ==
@@ -121,22 +126,22 @@ $(GEODATA_DIR)/%-stations.osm: $(GEODATA_DIR)/%-latest.o5m osmfilter
 $(GEODATA_DIR)/dach-latest.o5m:
 	@mkdir -p $(GEODATA_DIR)
 	@echo "Downloading DACH osm stations..."
-	@curl --insecure -L "http://download.geofabrik.de/europe/dach-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
+	@curl --insecure -Lq "http://download.geofabrik.de/europe/dach-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
 
 $(GEODATA_DIR)/uk-latest.o5m:
 	@mkdir -p $(GEODATA_DIR)
 	@echo "Downloading UK osm stations..."
-	@curl --insecure -L "https://download.geofabrik.de/europe/great-britain-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
+	@curl --insecure -Lq "https://download.geofabrik.de/europe/great-britain-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
 
 $(GEODATA_DIR)/london-latest.o5m:
 	@mkdir -p $(GEODATA_DIR)
 	@echo "Downloading London osm stations..."
-	@curl --insecure -L "http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
+	@curl --insecure -Lq "http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
 
 $(GEODATA_DIR)/freiburg-regbz-latest.o5m:
 	@mkdir -p $(GEODATA_DIR)
 	@echo "Downloading Freiburg RegBZ osm stations..."
-	@curl --insecure -L "http://download.geofabrik.de/europe/germany/baden-wuerttemberg/freiburg-regbez-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
+	@curl --insecure -Lq "http://download.geofabrik.de/europe/germany/baden-wuerttemberg/freiburg-regbez-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
 
 $(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m osmconvert
 	@mkdir -p $(GEODATA_DIR)
@@ -145,3 +150,4 @@ $(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m osm
 clean:
 	@rm -rf $(GEODATA_DIR)
 	@rm -rf $(EVAL_RES_DIR)
+	@rm *.eval.tsv

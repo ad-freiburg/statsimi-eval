@@ -12,9 +12,9 @@ Use these targets either as ``make <target>`` if statsimi is already installed, 
 
  * ``help`` Display help
  * ``eval`` Run evaluation for each dataset
- * ``freiburg_eval`` Run evaluation on the Freiburg dataset
- * ``london_eval`` Run evaluation on the London dataset
- * ``dach_eval`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
+ * ``freiburg.eval.tsv`` Run evaluation on the Freiburg dataset
+ * ``london.eval.tsv`` Run evaluation on the London dataset
+ * ``dach.eval.tsv`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
 
 Evaluation results and the geodata will be written into a folder ``/data``.
 
@@ -35,9 +35,9 @@ To easily retrieve them, mount ``/root/data`` to a local folder:
 
     $ sudo docker run -v /local/folder/:/root/data statsimi-eval eval
 
-# Normalization
+# Evaluation with normalization
 
-A normalization file for German datasets can be found in this repository (``normalization.rules``).
+A normalization file with manually created rules for German datasets can be found in this repository (``normalization.rules``).
 Prepend the targets with ``NORM_FILE=normalization.rules`` to use it, e.g.:
 
     $ sudo docker run -v /local/folder/:/root/data statsimi-eval NORM_FILE=normalization.rules eval
