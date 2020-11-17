@@ -25,7 +25,7 @@ install: osmfilter osmconvert
 	@git clone --recurse-submodules https://github.com/ad-freiburg/statsimi
 	@cd statsimi && pip3 install wheel && pip3 install .
 
-eval: freiburg.eval.tsv london.eval.tsv dach.eval.tsv
+eval: uk.eval.tsv dach.eval.tsv
 
 osmfilter:
 	@echo Installing osmfilter
