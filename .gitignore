@@ -1,2 +1,8 @@
 osmconvert
 osmfilter
+*.eval.tsv
+*.distr
+*.swp
+venv/
+*.pairs
+data/
