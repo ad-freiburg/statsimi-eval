@@ -12,8 +12,7 @@ Use these targets either as ``make <target>`` if statsimi is already installed, 
 
  * ``help`` Display help
  * ``eval`` Run evaluation for each dataset
- * ``freiburg.eval.tsv`` Run evaluation on the Freiburg dataset
- * ``london.eval.tsv`` Run evaluation on the London dataset
+ * ``uk.eval.tsv`` Run evaluation on the UK dataset
  * ``dach.eval.tsv`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
 
 Evaluation results and the geodata will be written into a folder ``/data``.
