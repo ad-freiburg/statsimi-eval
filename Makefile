@@ -126,7 +126,7 @@ $(EVAL_RES_DIR)/%/rf_pos_pairs/output.txt: $(GEODATA_DIR)/%-stations.train.pairs
 	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="rf" --fbtestargs="num_pos_pairs=0, 1, 2, 3, 4, 5" --eval-out $| --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
 
-$(GEODATA_DIR)/%-stations.osm: $(GEODATA_DIR)/%-latest.o5m osmfilter
+$(GEODATA_DIR)/%-stations.osm: $(GEODATA_DIR)/%-latest.o5m | osmfilter
 	@echo "Filtering osm stations..."
 	@./osmfilter $< --keep="public_transport=stop public_transport=stop_position public_transport=platform public_transport=station public_transport=halt highway=bus_stop railway=stop railway=station railway=halt railway=tram_stop railway=platform tram=stop subway=stop" --keep-relations="public_transport=stop_area public_transport=stop_area_group" --drop-version -o=$@
 
@@ -159,7 +159,7 @@ $(GEODATA_DIR)/freiburg-regbz-latest.o5m:
 	@echo "Downloading Freiburg RegBZ OSM stations..."
 	@curl --insecure -LSs "http://download.geofabrik.de/europe/germany/baden-wuerttemberg/freiburg-regbez-latest.osm.pbf" | ./osmconvert - --drop-author --drop-version -o=$@
 
-$(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m osmconvert
+$(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m | osmconvert
 	@mkdir -p $(GEODATA_DIR)
 	@./osmconvert $< -b=7.713899,47.9285939,7.973421,48.075549 > $@
 
