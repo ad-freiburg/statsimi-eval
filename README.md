@@ -12,8 +12,8 @@ Use these targets either as ``make <target>`` if statsimi is already installed, 
 
  * ``help`` Display help
  * ``eval`` Run evaluation for each dataset
- * ``uk.eval.tsv`` Run evaluation on the UK dataset
- * ``dach.eval.tsv`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
+ * ``data/evaluation_run/uk.eval.tsv`` Run evaluation on the UK dataset
+ * ``data/evaluation_run/dach.eval.tsv`` Run evaluation on the combined dataset of Germany, Austria and Switzerland
 
 Evaluation results and the geodata will be written into a folder ``/data``.
 
