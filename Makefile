@@ -30,7 +30,7 @@ install: osmfilter osmconvert
 	@git clone --recurse-submodules https://github.com/ad-freiburg/statsimi
 	@cd statsimi && pip3 install wheel && pip3 install .
 
-eval: uk.eval.tsv dach.eval.tsv
+eval: $(EVAL_RES_DIR)/uk.eval.tsv $(EVAL_RES_DIR)/dach.eval.tsv
 
 osmfilter:
 	@echo Installing osmfilter
@@ -43,7 +43,7 @@ osmconvert:
 $(EVAL_RES_DIR)/%/:
 	@mkdir -p $@
 
-%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf_topk/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
+$(EVAL_RES_DIR)/%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf_topk/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
 	@echo
 	@echo Finished evaluation run for $*.
 	@echo This table is saved to $@
