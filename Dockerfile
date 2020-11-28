@@ -14,7 +14,8 @@ RUN apt-get -y -q update \
 	python3 \
 	python3-pip \
 	python3-setuptools \
-	python3-dev
+	python3-dev \
+	util-linux
 ENV HOME /root
 ENV PATH="${PATH}:/usr/local/bin:$HOME/.local/bin"
 COPY Makefile $HOME
