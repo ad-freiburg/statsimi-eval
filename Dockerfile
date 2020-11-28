@@ -15,7 +15,7 @@ RUN apt-get -y -q update \
 	python3-pip \
 	python3-setuptools \
 	python3-dev \
-	util-linux
+	bsdmainutils
 ENV HOME /root
 ENV PATH="${PATH}:/usr/local/bin:$HOME/.local/bin"
 COPY Makefile $HOME
