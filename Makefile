@@ -17,6 +17,7 @@ EVAL_ARGS := --runs=$(EVAL_RUNS)
 
 EVAL_RES_DIR := data/evaluation_run
 GEODATA_DIR := data/geodata
+MODEL_DIR := data/models
 
 .SECONDARY:
 
@@ -32,6 +33,8 @@ install: osmfilter osmconvert
 
 eval: $(EVAL_RES_DIR)/uk.eval.tsv $(EVAL_RES_DIR)/dach.eval.tsv
 
+models: $(MODEL_DIR)/uk.model $(MODEL_DIR)/dach.model
+
 osmfilter:
 	@echo Installing osmfilter
 	@curl -sS --insecure -L http://m.m.i24.cc/osmfilter.c | cc -x c - -O3 -o $@
@@ -43,7 +46,10 @@ osmconvert:
 $(EVAL_RES_DIR)/%/:
 	@mkdir -p $@
 
-$(EVAL_RES_DIR)/%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf_topk/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
+$(MODEL_DIR)/:
+	@mkdir -p $@
+
+$(EVAL_RES_DIR)/%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
 	@echo
 	@echo Finished evaluation run for $*.
 	@echo This table is saved to $@
@@ -113,6 +119,14 @@ $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt: $(GEODATA_DIR)/%-stations.train.pair
 	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.train.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="geodist, tfidf" --modeltestargs="geodist_threshold=0.1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250, 300, 350, 400, 450, 500;tfidf_threshold=0.001, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.999" --voting='soft' --topk 0 --eval-out $| --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
 
+$(EVAL_RES_DIR)/%/rf/output.txt: $(GEODATA_DIR)/%-stations.train.pairs $(GEODATA_DIR)/%-stations.test.pairs | $(EVAL_RES_DIR)/%/rf/
+	@echo == Evaluating RF for topk=2500 for $* ==
+	# train on 100% of the provided test pairs file, which
+	# has been created by splitting the original pairs into
+	# two random 20%/80% parts
+	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="rf" --fbtestargs="topk=2500"  --eval-out $| --model_out "" 2>&1 | tee $@.tmp
+	@mv $@.tmp $@
+
 $(EVAL_RES_DIR)/%/rf_topk/output.txt: $(GEODATA_DIR)/%-stations.train.pairs $(GEODATA_DIR)/%-stations.test.pairs | $(EVAL_RES_DIR)/%/rf_topk/
 	@echo == Evaluating topk qgram number for $* ==
 	# train on 100% of the provided test pairs file, which
@@ -125,6 +139,13 @@ $(EVAL_RES_DIR)/%/rf_pos_pairs/output.txt: $(GEODATA_DIR)/%-stations.train.pairs
 	@echo == Evaluating number of pos pairs $* ==
 	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="rf" --fbtestargs="num_pos_pairs=0, 1, 2, 3, 4, 5" --eval-out $| --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
+
+$(MODEL_DIR)/%.model: $(GEODATA_DIR)/%-stations.train.pairs | $(MODEL_DIR)/
+	@echo == Building RF model for $* ==
+	# train on 100% of the provided test pairs file, which
+	# has been created by splitting the original pairs into
+	# two random 20%/80% parts
+	$(STATSIMI) model --topk 2500 -p 1 --train $(GEODATA_DIR)/$*-stations.train.pairs/1.pairs --method="rf" --model_out $@
 
 $(GEODATA_DIR)/%-stations.osm: $(GEODATA_DIR)/%-latest.o5m | osmfilter
 	@echo "Filtering osm stations..."
@@ -164,6 +185,7 @@ $(GEODATA_DIR)/freiburg-latest.o5m: $(GEODATA_DIR)/freiburg-regbz-latest.o5m | o
 	@./osmconvert $< -b=7.713899,47.9285939,7.973421,48.075549 > $@
 
 clean:
+	@rm -rf $(MODEL_DIR)
 	@rm -rf $(GEODATA_DIR)
 	@rm -rf $(EVAL_RES_DIR)
 	@rm -f *.eval.tsv
