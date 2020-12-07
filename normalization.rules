@@ -45,18 +45,23 @@ _ -> ' ';
 str\. -> strasse;
 pl\. -> platz;
 av\. -> avenue;
+wg\. -> weg;
 
 '(^| )im ' -> '\1';
 '(^| )in der ' -> '\1';
+'(^| )i\. d\. ' -> '\1';
 '(^| )am ' -> '\1';
 '(^| )an der ' -> '\1';
+'(^| )a\. d\. ' -> '\1';
 '(^| )in ' -> '\1';
 
-# always separate 'strasse', 'weg', 'platz', 'gasse'
+# always separate 'strasse', 'weg', 'platz', 'gasse', 'allee'
 '([a-zA-Z])strasse($| )' -> '\1 strasse\2';
+'([a-zA-Z])avenue($| )' -> '\1 avenue\2';
 '([a-zA-Z])weg($| )' -> '\1 weg\2';
 '([a-zA-Z])platz($| )' -> '\1 platz\2';
 '([a-zA-Z])gasse($| )' -> '\1 gasse\2';
+'([a-zA-Z])allee($| )' -> '\1 allee\2';
 
 # normalize every possible abbr. of german "Bahnhof", "Hauptbahnhof", "Busbahnhof"
 '(^| )hauptbf\.($| )' -> '\1hauptbahnhof\2';
@@ -85,9 +90,8 @@ av\. -> avenue;
 '(^| )bhf\.($| )' -> '\1bahnhof\2';
 '(^| )bhf($| )' -> '\1bahnhof\2';
 '(^| )bhfeingang($| )' -> '\1bahnhofeingang\2';
-'(^| )gare de($| )' -> '\1gare\2';
 
-# if a stations starts with  single station identifier
+# if a stations starts with single station identifier
 # always put it at the end (for example, "hauptbahnhof freiburg" becomes "freiburg hauptbahnhof")
 '^hauptbahnhof (.+)$' -> \1 hauptbahnhof;
 '^bahnhof (.+)$' -> \1 bahnhof;
@@ -117,18 +121,24 @@ av\. -> avenue;
 '(^| )und($| )' -> '\1und\2';
 '(^| )et($| )' -> '\1und\2';
 
-# noise
+# other noise
 '\sde\s' -> ' ';
 '\sda\s' -> ' ';
 '\sdi\s' -> ' ';
 '\sdel\s' -> ' ';
 '\sdal\s' -> ' ';
+'\szu\s' -> ' ';
+'\sob\s' -> ' ';
+'\sund\s' -> ' ';
 
 # abbrv in most western languages
 '(^| )saint ' -> '\1st. ';
 '(^| )sankt ' -> '\1st. ';
 '(^| )sanct ' -> '\1st. ';
 \. -> ' ';
+
+# remove single letters and numbers
+'(^| )[a-zA-Z0-9]($| )' -> '\1 \2';
 
 # whitespace
 \s+ -> ' ';
