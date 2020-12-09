@@ -11,9 +11,9 @@ SPICE := --spice=0.5
 EVAL_RUNS := 5
 
 # arguments for building the pairs files, use 20% as training, 80% as test data (-p 0.2)
-PAIRS_BUILD_ARGS := --unique --clean_data $(SPICE) --norm_file=$(NORM_FILE) --cutoffdist=$(CUTOFFDIST) -p 0.2
+PAIRS_BUILD_ARGS := --unique --clean_data $(SPICE) --cutoffdist=$(CUTOFFDIST) -p 0.2
 
-EVAL_ARGS := --runs=$(EVAL_RUNS)
+EVAL_ARGS := --runs=$(EVAL_RUNS) --norm_file=$(NORM_FILE)
 
 EVAL_RES_DIR := data/evaluation_run
 GEODATA_DIR := data/geodata
