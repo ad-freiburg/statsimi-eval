@@ -49,7 +49,7 @@ $(EVAL_RES_DIR)/%/:
 $(MODEL_DIR)/:
 	@mkdir -p $@
 
-$(EVAL_RES_DIR)/%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt
+$(EVAL_RES_DIR)/%.eval.tsv: $(EVAL_RES_DIR)/%/geodist/output.txt $(EVAL_RES_DIR)/%/editdist/output.txt $(EVAL_RES_DIR)/%/jaccard/output.txt $(EVAL_RES_DIR)/%/ped/output.txt $(EVAL_RES_DIR)/%/bts/output.txt $(EVAL_RES_DIR)/%/jaro/output.txt $(EVAL_RES_DIR)/%/jaro_winkler/output.txt $(EVAL_RES_DIR)/%/tfidf/output.txt $(EVAL_RES_DIR)/%/rf/output.txt $(EVAL_RES_DIR)/%/geodist-editdist/output.txt $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt $(EVAL_RES_DIR)/%/geodist-bts/output.txt $(EVAL_RES_DIR)/%/geodist-jaccard/output.txt
 	@echo
 	@echo Finished evaluation run for $*.
 	@echo This table is saved to $@
@@ -182,6 +182,18 @@ $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt: $(GEODATA_DIR)/%-stations.test.pairs
 	@tail -n1 $@.tmp | sed -re "s/.*tfidf_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts_tfidf
 	@# evaluate the best threshold value on the test data (but still take TFIDF scores from the train data!), print result
 	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="geodist,tfidf" --modeltestargs="geodist_threshold=`cat $@.ts_geo`;tfidf_threshold=`cat $@.ts_tfidf`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
+	@mv $@.tmp $@
+
+$(EVAL_RES_DIR)/%/geodist-jaccard/output.txt: $(GEODATA_DIR)/%-stations.test.pairs  $(GEODATA_DIR)/%-stations.train.pairs | $(EVAL_RES_DIR)/%/geodist-jaccard/
+	@echo == Evaluating combination of geodist and jaccard using soft voting approach for $* ==
+	@# find the best threshold value on the train data
+	$(STATSIMI) evaluate-par $(EVAL_ARGS) --test $(GEODATA_DIR)/$*-stations.train.pairs/* --method="geodist, jaccard" --modeltestargs="geodist_threshold=0.1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250, 300, 350, 400, 450, 500;jaccard_threshold=0.001, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.999" --voting='soft' --topk 0 --eval-out $| --model_out "" 2>&1 | tee $@.tmp
+	@# print the best threshold value for geodist to $@.ts_geo
+	@tail -n1 $@.tmp | sed -re "s/.*geodist_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts_geo
+	@# print the best threshold value for edidist to $@.ts_ed
+	@tail -n1 $@.tmp | sed -re "s/.*jaccard_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts_jaccard
+	@# evaluate the best threshold value on the test data, print result
+	$(STATSIMI) evaluate-par $(EVAL_ARGS) --test $(GEODATA_DIR)/$*-stations.test.pairs/* --method="geodist,jaccard" --modeltestargs="geodist_threshold=`cat $@.ts_geo`;jaccard_threshold=`cat $@.ts_jaccard`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
 
 $(EVAL_RES_DIR)/%/rf/output.txt: $(GEODATA_DIR)/%-stations.train.pairs $(GEODATA_DIR)/%-stations.test.pairs | $(EVAL_RES_DIR)/%/rf/
