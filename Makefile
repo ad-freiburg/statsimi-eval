@@ -94,8 +94,8 @@ $(EVAL_RES_DIR)/%/tfidf/output.txt: $(GEODATA_DIR)/%-stations.test.pairs $(GEODA
 	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.train.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="tfidf" --modeltestargs="tfidf_threshold=0.001, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.999" --topk 0 --eval-out $|  --model_out "" 2>&1 | tee $@.tmp
 	@# print the best threshold value to $@.ts
 	@tail -n1 $@.tmp | sed -re "s/.*tfidf_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts
-	@# evaluate the best threshold value on the test data, print result
-	$(STATSIMI) evaluate-par $(EVAL_ARGS) --test $(GEODATA_DIR)/$*-stations.test.pairs/* --method="tfidf" --modeltestargs="tfidf_threshold=`cat $@.ts`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
+	@# evaluate the best threshold value on the test data (but still take TFIDF score from the train data!), print result
+	$(STATSIMI) evaluate-par $(EVAL_ARGS) --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="tfidf" --modeltestargs="tfidf_threshold=`cat $@.ts`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
 
 $(EVAL_RES_DIR)/%/jaro/output.txt: $(GEODATA_DIR)/%-stations.test.pairs $(GEODATA_DIR)/%-stations.train.pairs | $(EVAL_RES_DIR)/%/jaro/
@@ -180,8 +180,8 @@ $(EVAL_RES_DIR)/%/geodist-tfidf/output.txt: $(GEODATA_DIR)/%-stations.test.pairs
 	@tail -n1 $@.tmp | sed -re "s/.*geodist_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts_geo
 	@# print the best threshold value for edidist to $@.ts_ed
 	@tail -n1 $@.tmp | sed -re "s/.*tfidf_threshold'\:\ ([0-9]?\.?[0-9]+).*/\1/g" > $@.ts_tfidf
-	@# evaluate the best threshold value on the test data, print result
-	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.train.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="geodist,tfidf" --modeltestargs="geodist_threshold=`cat $@.ts_geo`;tfidf_threshold=`cat $@.ts_tfidf`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
+	@# evaluate the best threshold value on the test data (but still take TFIDF scores from the train data!), print result
+	$(STATSIMI) evaluate-par $(EVAL_ARGS) -p 1 --test $(GEODATA_DIR)/$*-stations.test.pairs/* --train $(GEODATA_DIR)/$*-stations.train.pairs/* --method="geodist,tfidf" --modeltestargs="geodist_threshold=`cat $@.ts_geo`;tfidf_threshold=`cat $@.ts_tfidf`" --topk 0 --model_out "" 2>&1 | tee $@.tmp
 	@mv $@.tmp $@
 
 $(EVAL_RES_DIR)/%/rf/output.txt: $(GEODATA_DIR)/%-stations.train.pairs $(GEODATA_DIR)/%-stations.test.pairs | $(EVAL_RES_DIR)/%/rf/

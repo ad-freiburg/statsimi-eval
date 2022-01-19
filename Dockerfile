@@ -11,6 +11,8 @@ RUN apt-get -y -q update \
 	texlive-xetex \
 	curl \
 	libz-dev \
+	libjpeg-dev \
+	libtiff-dev \
 	python3 \
 	python3-pip \
 	python3-setuptools \
